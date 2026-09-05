@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DevTrack Pro</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="toast"></div>
+
+<section id="login" class="login-screen">
+  <div class="login-card">
+    <div class="logo">DT</div>
+    <h1>DevTrack Pro</h1>
+    <p class="muted">Mesa de ayuda y gestión de incidencias</p>
+    <div class="demo">
+      <b>Usuarios demo</b>
+      <span>Admin: admin@devtrack.local / admin123</span>
+      <span>Técnico: tecnico@devtrack.local / tecnico123</span>
+      <span>Usuario: usuario@devtrack.local / usuario123</span>
+    </div>
+    <form id="loginForm">
+      <label>Correo<input id="email" type="email" required></label>
+      <label>Contraseña<input id="password" type="password" required></label>
+      <button class="primary">Ingresar</button>
+    </form>
+  </div>
+</section>
+
+<div id="app" class="app hidden">
+  <aside>
+    <div class="brand"><span>DT</span><div><b>DevTrack Pro</b><small>Help Desk</small></div></div>
+    <nav>
+      <button data-view="dashboard" class="active">Dashboard</button>
+      <button data-view="tickets">Tickets</button>
+      <button data-view="users" class="admin">Usuarios</button>
+      <button data-view="categories" class="admin">Categorías</button>
+      <button data-view="reports">Reportes</button>
+    </nav>
+    <div class="profile">
+      <b id="who"></b><small id="role"></small>
+      <button id="logout">Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <main>
+    <header>
+      <div><h2 id="title">Dashboard</h2><p id="subtitle">Resumen general</p></div>
+      <button id="newTicket" class="primary">+ Nuevo ticket</button>
+    </header>
+
+    <section id="dashboardView" class="view">
+      <div class="stats">
+        <article><span>Total</span><strong id="sTotal">0</strong></article>
+        <article><span>Abiertos</span><strong id="sOpen">0</strong></article>
+        <article><span>En progreso</span><strong id="sProgress">0</strong></article>
+        <article><span>Resueltos</span><strong id="sDone">0</strong></article>
+      </div>
+      <div class="grid2">
+        <article class="panel"><h3>Tickets por estado</h3><div id="statusBars"></div></article>
+        <article class="panel"><h3>Tickets por prioridad</h3><div id="priorityBars"></div></article>
+      </div>
+      <article class="panel"><h3>Actividad reciente</h3><div id="activity"></div></article>
+    </section>
+
+    <section id="ticketsView" class="view hidden">
+      <div class="toolbar">
+        <input id="search" placeholder="Buscar ticket...">
+        <select id="fStatus"><option value="">Todos los estados</option><option>Abierto</option><option>Asignado</option><option>En progreso</option><option>Resuelto</option><option>Cerrado</option></select>
+        <select id="fPriority"><option value="">Todas las prioridades</option><option>Baja</option><option>Media</option><option>Alta</option><option>Crítica</option></select>
+      </div>
+      <article class="panel tablebox">
+        <table>
+          <thead><tr><th>ID</th><th>Asunto</th><th>Categoría</th><th>Prioridad</th><th>Estado</th><th>Solicitante</th><th>Asignado</th><th></th></tr></thead>
+          <tbody id="ticketRows"></tbody>
+        </table>
+      </article>
+    </section>
+
+    <section id="usersView" class="view hidden">
+      <div class="toolbar"><button id="newUser" class="primary">+ Nuevo usuario</button></div>
+      <article class="panel tablebox">
+        <table><thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th></th></tr></thead><tbody id="userRows"></tbody></table>
+      </article>
+    </section>
+
+    <section id="categoriesView" class="view hidden">
+      <div class="grid2">
+        <article class="panel">
+          <h3>Nueva categoría</h3>
+          <form id="categoryForm">
+            <label>Nombre<input id="catName" required></label>
+            <label>Descripción<textarea id="catDesc"></textarea></label>
+            <button class="primary">Agregar</button>
+          </form>
+        </article>
+        <article class="panel"><h3>Categorías</h3><div id="categoryList"></div></article>
+      </div>
+    </section>
+
+    <section id="reportsView" class="view hidden">
+      <div class="grid2">
+        <article class="panel">
+          <h3>Exportación</h3>
+          <p class="muted">Descarga la información del sistema.</p>
+          <button id="csv" class="primary">Exportar CSV</button>
+          <button id="json" class="secondary">Respaldar JSON</button>
+        </article>
+        <article class="panel"><h3>Indicadores</h3><div id="metrics"></div></article>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="ticketModal" class="modal hidden">
+  <div class="backdrop" data-close="ticketModal"></div>
+  <div class="modal-card">
+    <div class="modal-head"><h2 id="ticketModalTitle">Nuevo ticket</h2><button data-close="ticketModal">×</button></div>
+    <form id="ticketForm" class="formgrid">
+      <input id="ticketId" type="hidden">
+      <label class="wide">Asunto<input id="tTitle" required></label>
+      <label>Categoría<select id="tCategory"></select></label>
+      <label>Prioridad<select id="tPriority"><option>Baja</option><option selected>Media</option><option>Alta</option><option>Crítica</option></select></label>
+      <label class="wide">Descripción<textarea id="tDescription" rows="5" required></textarea></label>
+      <label class="staff">Asignar a<select id="tAssigned"></select></label>
+      <label class="staff">Estado<select id="tStatus"><option>Abierto</option><option>Asignado</option><option>En progreso</option><option>Resuelto</option><option>Cerrado</option></select></label>
+      <div class="wide actions"><button type="button" class="secondary" data-close="ticketModal">Cancelar</button><button class="primary">Guardar</button></div>
+    </form>
+  </div>
+</div>
+
+<div id="detailModal" class="modal hidden">
+  <div class="backdrop" data-close="detailModal"></div>
+  <div class="modal-card large">
+    <div class="modal-head"><div><h2 id="dTitle"></h2><p id="dMeta" class="muted"></p></div><button data-close="detailModal">×</button></div>
+    <div id="dBadges"></div>
+    <p id="dDescription" class="description"></p>
+    <div class="detailgrid">
+      <div>
+        <div class="panel inner"><h3>Comentarios</h3><div id="comments"></div>
+          <form id="commentForm"><textarea id="comment" required placeholder="Agregar comentario..."></textarea><button class="primary">Comentar</button></form>
+        </div>
+      </div>
+      <div>
+        <div class="panel inner"><h3>Información</h3><div id="dInfo"></div></div>
+        <div class="panel inner"><h3>Historial</h3><div id="history"></div></div>
+      </div>
+    </div>
+    <div class="actions staff"><button id="editTicket" class="secondary">Editar</button><button id="deleteTicket" class="danger admin">Eliminar</button></div>
+  </div>
+</div>
+
+<div id="userModal" class="modal hidden">
+  <div class="backdrop" data-close="userModal"></div>
+  <div class="modal-card">
+    <div class="modal-head"><h2>Nuevo usuario</h2><button data-close="userModal">×</button></div>
+    <form id="userForm">
+      <label>Nombre<input id="uName" required></label>
+      <label>Correo<input id="uEmail" type="email" required></label>
+      <label>Contraseña<input id="uPass" required></label>
+      <label>Rol<select id="uRole"><option>Usuario</option><option>Técnico</option><option>Administrador</option></select></label>
+      <button class="primary">Crear usuario</button>
+    </form>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
